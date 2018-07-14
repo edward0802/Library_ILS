@@ -6,6 +6,12 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using LibraryDara;
+using Microsoft.EntityFrameworkCore;
+using LibraryServices;
+using AutoMapper;
+using LibraryDara.Models;
+using Library_ILS.Models.Catalog;
 
 namespace Library_ILS
 {
@@ -22,8 +28,15 @@ namespace Library_ILS
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-        }
+            services.AddSingleton(Configuration);
+            services.AddScoped<ILibraryAssetRepo, LibraryAssetsRepo>();
+            services.AddDbContext<LibraryContext>(optionsAction 
+                => optionsAction.UseSqlServer(Configuration.GetConnectionString("LibraryConnection")) );
+            
 
+            
+        }
+        
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
@@ -38,6 +51,21 @@ namespace Library_ILS
             }
 
             app.UseStaticFiles();
+
+            Mapper.Initialize(config => 
+            {
+                config.CreateMap<LibraryAsset, AssetIndexListingViewModel>();
+            });
+
+
+
+
+
+
+
+
+
+
 
             app.UseMvc(routes =>
             {

@@ -16,8 +16,9 @@ namespace LibraryDara.Models
 
         public LibraryCard LibraryCard { get; set; } // one-to-one
 
-        // fees time overdue fees. Membership card works from (since) date to (Until) date
+        // ПОЯСНЕННЯ: ці DateTime показують, коли (Since)наш обєкт бібліотеки (книга, відео) 
+        // були взяті кимось (на Checkout - тобто читання), і коли повинні бути здані Until 
         public DateTime Since { get; set; }
-        public DateTime Until { get; set; }
+        public DateTime Until { get; set; } // вказуємо до якого числа треба повернути книгу
     }
 }

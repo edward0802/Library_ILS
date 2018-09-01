@@ -30,10 +30,12 @@ namespace Library_ILS
             services.AddMvc();
             services.AddSingleton(Configuration);
             services.AddScoped<ILibraryAssetRepo, LibraryAssetsRepo>();
+            services.AddScoped<ICheckout, CheckoutService>();
+
             services.AddDbContext<LibraryContext>(optionsAction 
                 => optionsAction.UseSqlServer(Configuration.GetConnectionString("LibraryConnection")) );
-            
 
+            
             
         }
         

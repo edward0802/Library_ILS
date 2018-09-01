@@ -1,0 +1,127 @@
+﻿@model Library_ILS.Models.Catalog.AssetDetailModel;
+
+<div class="container">
+    <div class="page-header clearfix detailHeading">
+        <h2 class="text-muted">View Library Item</h2>
+    </div>
+</div>
+
+
+d<div class="jumbotron">
+    <div class="row">
+        <div class="col-md-4">
+            <img src="@Model.ImageUrl" class="detailImage" />
+        </div>
+        <div class="col-md-4">
+            <p id="itemTitle">@Model.Title</p>
+            <p id="itemAuthor">@Model.AuthorOrDirector</p>
+            <p id="itemStatus">@Model.Status</p>
+            <p id="itemType">@Model.Type</p>
+            <p id="itemLocation">@Model.CurrentLocation</p>
+
+            @* якщо обєкт бібліотеки загубився *@
+            @if (Model.Status == "Lost")
+            {
+                <p>This item has been lost. You cannot check out it</p>
+                // кнопка, якщо ми знайшли наш загублений обєкт
+                <p><a class="btn btn-lg btn-danger" role="button" asp-controller="Catalog" asp-action="MarkFound" asp-route-id="@Model.AssetId">Mark Item Found</a></p>
+            }
+
+            @*якщо читач взяв обєкт бібліотеки і він в нього *@
+            @if (Model.Status == "Checked out")
+            {
+                <p id="itemPatron">Checked out by: @Model.PatronName</p>
+                //кнопка для того, якщо книжку хочуть здати,
+                <p><a class="btn btn-lg btn-success" role="button" asp-controller="Catalog" asp-action="CheckIn" asp-route-id="@Model.AssetId">Check in</a></p>
+
+                <p><a class="btn btn-lg btn-warning" role="button" asp-controller="Catalog" asp-action="Hold" asp-route-id="@Model.AssetId">Place Hold</a></p>
+            }
+
+            @* якщо обєкт (книга і тд) доступні в бібліотеці і ніким не юзаються в даний момент*@
+            @if (Model.Status == "Available")
+            {
+                // кнопка для того, щоб зробити обєкт "Checked out", тобто під час видачи клацнути цю кнопку, щоб зробити
+                // обєкт недоступним
+                <p><a class="btn btn-lg btn-info" role="button" asp-controller="Catalog" asp-action="Checkout" asp-route-id="@Model.AssetId">Check out</a></p>
+
+            }
+
+        </div>
+        <div class="col-md-4 detailInfo">
+            <table>
+                <tr>
+                    <td class="itemLabel">ISBN: </td>
+                    <td class="itemValue">@Model.ISBN</td>
+                </tr>
+                <tr>
+                    <td class="itemLabel">Call Number: </td>
+                    <td class="itemValue">@Model.DeweyCallNumber</td>
+                </tr>
+                <tr>
+                    @* ціна за загублену книгу *@
+                    <td class="itemLabel">Replacement Cost: </td>
+                    <td class="itemValue">@Model.Cost</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+@* Добавимо наступний код: *@
+
+<div class="row">
+    <div class="col-lg-6">
+        <h4>Checkout History</h4>
+        <table class="table table-bordered table-hover table-condensed">
+            <thead>
+                <tr>
+                    <th>Date Loaned</th>
+                    <th>Date Returned</th>
+                    <th>Card Id</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var checkout in @Model.CheckoutHistory)
+                {
+                    <tr>
+                        <td>
+                            @checkout.ChekedOut
+                        </td>
+                        <td>
+                            @checkout.ChekedIn
+                        </td>
+                        <td>
+                            @checkout.LibraryCard.Id
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="col-lg-6">
+        <h4>Current Holds</h4>
+        <table class="table table-bordered table-hover table-condensed">
+            <thead>
+                <tr>
+                    <th>Hold Placed</th>
+                    <th>Patron</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var hold in @Model.CurrentHolds)
+                {
+                    <tr>
+                        <td>
+                            @hold.HoldPlaced
+                        </td>
+                        <td>
+                            @hold.PatronName
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+</div>             

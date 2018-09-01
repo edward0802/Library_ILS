@@ -44,7 +44,7 @@ namespace LibraryServices
                 _context.Videos.FirstOrDefault(v => v.Id == id).Director
                 ?? "Nothing";
             // 2 WAY:
-            //string type = GetType(id);
+            //string type = GetType(id); // doesn't work because г compare int num (id == int)
             //if (type.GetType() == typeof(Book))
             //{
             //    return _context.Books.Where(b => b.Id == id).Select(b => b.Author).FirstOrDefault();

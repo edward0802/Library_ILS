@@ -15,10 +15,10 @@ namespace LibraryDara
         IEnumerable<CheckoutHistory> GetCheckoutHistory(int id);
         void PlaceHold(int assetId, int libraryCardId);
         void CheckOutItem(int id, int libraryCardId);
-        void CheckInItem(int id, int libraryCardId);
+        void CheckInItem(int id);
         Checkout GetLatestCheckout(int id);
         //int GetNumberOfCopies(int id);
-        bool IsChekedOut(int id);
+        bool IsCheckedOut(int id);
 
         string GetCurrentHoldPatronName(int holdId);
         string GetCurrentCheckoutPatron(int assetId);

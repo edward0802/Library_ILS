@@ -26,7 +26,7 @@ namespace LibraryServices
         }
 
         // коли здають книгу
-        public void CheckInItem(int assetId, int libraryCardId)
+        public void CheckInItem(int assetId)
         {
             var now = DateTime.Now;
 
@@ -45,15 +45,17 @@ namespace LibraryServices
             var currentHolds = _context.Holds
                 .Include(h => h.LibraryAsset)
                 .Include(h => h.LibraryCard)
-                .Where(h => h.Id == assetId);
+                .Where(h => h.LibraryAsset.Id == assetId);
 
             // 3.1. і якщо є черга, то перевести взяття книги (Checkout) на наступного в черзі
             if (currentHolds.Any()) // currentHolds != null
             {
-
                 // метод, який створює чекаут (тобто передає книгу) 
                 // наступному члену клуба, що найперший в черзі (hold)
                 CheckoutToearliestHold(assetId, currentHolds);
+                return; // ВАЖЛИВО: return !!! щоб воно вийшло з метода, бо інкаше піде далі і оновить 
+                        // нашу книгу до статусу Available, а це не правильно
+
                 //// ------------- to CheckoutToearliestHold method ----------------
                 //var earliesthold = currentHolds
                 //    //.Include(h => h.LibraryCard)
@@ -80,23 +82,12 @@ namespace LibraryServices
 
 
             }
+
             // 3.2. інакше, якщо черги немає, то зробимо статус нашої книги як доступний (Available)
             UpdateAssetStatus(assetId, "Available");
 
+
             _context.SaveChanges();
-        }
-
-        private void CheckoutToearliestHold(int assetId, IQueryable<Hold> currentHolds)
-        {
-            var earliestHold = currentHolds
-                .OrderBy(h => h.HoldPlaced)
-                .FirstOrDefault();
-
-            var card = earliestHold.LibraryCard;
-
-            _context.Remove(earliestHold);
-            _context.SaveChanges();
-            CheckOutItem(assetId, card.Id);
         }
 
         // коли беруть книгу CheckoutItem - взята книга
@@ -105,7 +96,7 @@ namespace LibraryServices
 
             var now = DateTime.Now; // щоб було однакове для всього методу 
             // перевіримо, чи книга вільна, щоб можна було її видати (на Checkout)
-            if (IsChekedOut(assetId))
+            if (IsCheckedOut(assetId))
             {
                 return;
                 // add logic to handle feedback to the user
@@ -147,12 +138,27 @@ namespace LibraryServices
 
         }
 
+        private void CheckoutToearliestHold(int assetId, IQueryable<Hold> currentHolds)
+        {
+            var earliestHold = currentHolds
+                .OrderBy(h => h.HoldPlaced)
+                .FirstOrDefault();
+
+            var card = earliestHold.LibraryCard;
+
+            _context.Remove(earliestHold);
+            _context.SaveChanges();
+            CheckOutItem(assetId, card.Id);
+        }
+
+
+
         private DateTime GetDefaultCheckoutTime(DateTime now)
         {
             return now.AddDays(30); // на 30 днів можна взяти книгу
         }
 
-        public bool IsChekedOut(int assetId)
+        public bool IsCheckedOut(int assetId)
         {
             // щоб перевірити чи книга вільна, перевіримо чи вона є в списку виданих (в списку Checkout'ів)
             return _context.Checkouts
@@ -206,12 +212,16 @@ namespace LibraryServices
                 .HoldPlaced;
         }
 
+        // добавити людину в чергу
         public void PlaceHold(int assetId, int libraryCardId)
         {
             var now = DateTime.Now;
 
-            var asset = _context.LibraryAssets.FirstOrDefault(a => a.Id == assetId);
-            var card = _context.LibraryCards.FirstOrDefault(c => c.Id == libraryCardId);
+            var asset = _context.LibraryAssets
+                .Include(la => la.Status)
+                .FirstOrDefault(a => a.Id == assetId);
+            var card = _context.LibraryCards
+                .FirstOrDefault(c => c.Id == libraryCardId);
 
             // at first - we'll check does it available 
             if (asset.Status.Name == "Available")
@@ -314,6 +324,8 @@ namespace LibraryServices
             // close any existing checkout history:
             // && h.ChekedIn == null - тобто обєкт, який не був зданий (бо він був загублений, тому в нього ChekedIn == null
             var history = _context.CheckoutHistories
+                .Include(h => h.LibraryAsset)
+                .Include(h => h.LibraryCard)
                 .FirstOrDefault(h => h.LibraryAsset.Id == id && h.ChekedIn == null);
 
             // оновимо історію цієї книги (чи відео) дописавши час її повернення ChekedIn
@@ -328,6 +340,8 @@ namespace LibraryServices
         {
             // remove any existing checkouts on the item:
             var checkout = _context.Checkouts
+                .Include(co => co.LibraryAsset)
+                .Include(co => co.LibraryCard)
                 .FirstOrDefault(co => co.LibraryAsset.Id == id);
 
             if (checkout != null)

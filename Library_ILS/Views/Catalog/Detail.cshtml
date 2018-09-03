@@ -7,7 +7,7 @@
 </div>
 
 
-d<div class="jumbotron">
+<div class="jumbotron">
     <div class="row">
         <div class="col-md-4">
             <img src="@Model.ImageUrl" class="detailImage" />
@@ -28,7 +28,7 @@ d<div class="jumbotron">
             }
 
             @*якщо читач взяв обєкт бібліотеки і він в нього *@
-            @if (Model.Status == "Checked out")
+            @if (Model.Status == "Checked Out")
             {
                 <p id="itemPatron">Checked out by: @Model.PatronName</p>
                 //кнопка для того, якщо книжку хочуть здати,

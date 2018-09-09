@@ -1,4 +1,5 @@
-﻿using LibraryDara;
+﻿using Library_ILS.Models.PatronModels;
+using LibraryDara;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -16,5 +17,28 @@ namespace Library_ILS.Controllers
         {
             _patron = patron;
         }
+
+        public IActionResult Index()
+        {
+            var allPatrons = _patron.GetAll();
+
+            var patronModels = allPatrons.Select(p => new PatronDetailModel
+            {
+                Id = p.Id,
+                FirstName = p.FirstName,
+                LastName = p.LastName,
+                LibraryCardId = p.LibraryCard.Id,
+                OverdueFees = p.LibraryCard.Fees,
+                HomeLibraryBranch = p.HomeLibraryBranch.Name
+            }).ToList();
+
+            var model = new PatronIndexModel()
+            {
+                Patrons = patronModels
+            };
+
+            return View(model);
+        }
+
     }
 }

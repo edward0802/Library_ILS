@@ -31,6 +31,7 @@ namespace Library_ILS
             services.AddSingleton(Configuration);
             services.AddScoped<ILibraryAssetRepo, LibraryAssetsRepo>();
             services.AddScoped<ICheckout, CheckoutService>();
+            services.AddScoped<IPatron, PatronService>();
 
             services.AddDbContext<LibraryContext>(optionsAction 
                 => optionsAction.UseSqlServer(Configuration.GetConnectionString("LibraryConnection")) );

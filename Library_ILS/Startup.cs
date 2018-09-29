@@ -32,6 +32,7 @@ namespace Library_ILS
             services.AddScoped<ILibraryAssetRepo, LibraryAssetsRepo>();
             services.AddScoped<ICheckout, CheckoutService>();
             services.AddScoped<IPatron, PatronService>();
+            services.AddScoped<ILibraryBranch, BranchService>();
 
             services.AddDbContext<LibraryContext>(optionsAction 
                 => optionsAction.UseSqlServer(Configuration.GetConnectionString("LibraryConnection")) );

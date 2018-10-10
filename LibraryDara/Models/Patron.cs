@@ -25,7 +25,7 @@ namespace LibraryDara.Models
         [Required]
         public string TelephoneNumber { get; set; }
 
-        public virtual LibraryCard LibraryCard { get; set; }
-        public virtual LibraryBranch HomeLibraryBranch { get; set; }
+        public virtual LibraryCard LibraryCard { get; set; } // create foreign key here, FK to LibraryCard (one-to-one)
+        public virtual LibraryBranch HomeLibraryBranch { get; set; } // create foreign key here, FK to LibraryBranch (one-to-one)
     }
 }
